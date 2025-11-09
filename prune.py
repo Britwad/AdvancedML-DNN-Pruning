@@ -22,4 +22,7 @@ def prune(model, device, prune_method, sample_dataloader, mask_type, sparsity  )
 
     pruner.apply_mask()
 
+    print("# Trainable Parameters : " + str(pruner.stats()[0]))
+    print("Total Amount of Parameters : " + str(pruner.stats()[1]))
+    print("Sparsity % : " + str(pruner.stats()[0]/pruner.stats()[1]))
     return pruner.masked_parameters

@@ -32,7 +32,16 @@ def train(
         model.train()
         train_loss = 0.0
         train_acc = 0.0
-    
+
+
+        # Use to ensure that your global sparsity is consistent with what you initially wanted
+        # nz, total = 0, 0
+        # for layer in model.modules():
+        #     if hasattr(layer, "weight_mask") and hasattr(layer, "weight"):
+        #         nz  += torch.count_nonzero(layer.weight).item()
+        #         total += layer.weight.numel()
+        # print("Global effective sparsity:", nz/total)
+
         for x_batch, labels in train_loader:
             x_batch, labels = x_batch.to(DEVICE), labels.to(DEVICE)
             optimizer.zero_grad()
@@ -48,7 +57,6 @@ def train(
             optimizer.step()
         train_losses.append(train_loss / len(train_loader))
         train_accuracies.append(train_acc / (batch_size * len(train_loader)))
-
         
         model.eval()
         val_loss = 0.0
@@ -107,7 +115,7 @@ def main():
     )
 
     batch_size = 128
-    epochs = 160
+    epochs = 120
     train_dataset, val_dataset = random_split(
         train_dataset, [int(0.9 * len(train_dataset)), int(0.1 * len(train_dataset))]
     )
@@ -123,7 +131,7 @@ def main():
     
 
     mask_type = "global"
-    sparsity = 0.8
+    sparsity = 0.2
     masked_parameters = prune(model, DEVICE, SNIP, sample_dataloader, mask_type, sparsity)
     print("---Pruning Complete---")
 
@@ -131,6 +139,8 @@ def main():
         mask.grad = None
         mask.requires_grad_(False)
         weight.requires_grad_(True)
+
+
 
     print("---training begins---")
     optimizer = SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=0.0001)
@@ -147,13 +157,15 @@ def main():
         batch_size,
         scheduler,
     )
-    plot(train_accuracy, val_accuracy)
+    plot(epochs, train_accuracy, val_accuracy)
 
     print("---running test---")
     print(evaluate(model, test_loader, DEVICE, batch_size))
 
-def plot(train_accuracy, val_accuracy):
-    epochs = range(1, 161)
+
+
+def plot(epochs,train_accuracy, val_accuracy):
+    epochs = range(1, epochs + 1)
     plt.plot(epochs, train_accuracy, label="Train Accuracy")
     plt.plot(epochs, val_accuracy, label="Validation Accuracy")
     plt.xlabel("Epoch")
