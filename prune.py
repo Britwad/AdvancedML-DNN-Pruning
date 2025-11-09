@@ -5,9 +5,8 @@ from Pruners.Pruners import SNIP, GraSP, SynFlow, Mag, Pruner
 
 ### other things to consider maybe 
 
-def prune(net, device, prune_method, sample_dataloader, mask_type, sparsity  ):
+def prune(model, device, prune_method, sample_dataloader, mask_type, sparsity  ):
 
-    model = net().to(device)
     criterion = nn.CrossEntropyLoss()
 
     masked_parameters = []
