@@ -22,7 +22,7 @@ class Pruner:
 
         # Threshold scores
         global_scores = torch.cat([torch.flatten(v) for v in self.scores.values()])
-        k = int((1.0 - sparsity) * global_scores.numel())
+        k = int(sparsity * global_scores.numel())
         if not k < 1:
             threshold, _ = torch.kthvalue(global_scores, k)
             for mask, param in self.masked_parameters:
@@ -36,7 +36,7 @@ class Pruner:
         """
         for mask, param in self.masked_parameters:
             score = self.scores[id(param)]
-            k = int((1.0 - sparsity) * score.numel())
+            k = int(sparsity * score.numel())
             if not k < 1:
                 threshold, _ = torch.kthvalue(torch.flatten(score), k)
                 zero = torch.tensor([0.]).to(mask.device)
@@ -69,7 +69,7 @@ class Pruner:
         for mask, param in self.masked_parameters:
             shape = mask.shape
             perm = torch.randperm(mask.nelement())
-            mask = mask.reshape(-1)[perm].reshape(shape)
+            mask.copy_(mask.reshape(-1)[perm].reshape(shape))
 
     def invert(self):
         for v in self.scores.values():

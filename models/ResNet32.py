@@ -1,5 +1,5 @@
 from torch.nn import functional as F
-from VGG import Conv2dMasked, LinearMasked
+from models.VGG import Conv2dMasked, LinearMasked
 import torch, time, numpy as np, matplotlib.pyplot as plt
 from torch import nn
 from torch.optim import SGD

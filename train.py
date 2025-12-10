@@ -102,6 +102,7 @@ def evaluate(
 
 
 def main():
+    torch.backends.cudnn.benchmark = True
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
     train_dataset = torchvision.datasets.CIFAR10(
@@ -120,11 +121,13 @@ def main():
         train_dataset, [int(0.9 * len(train_dataset)), int(0.1 * len(train_dataset))]
     )
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    kwargs = {'num_workers': 2, 'pin_memory': True, 'persistent_workers': True}
 
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, **kwargs)
 
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, **kwargs)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, **kwargs)
+
     sample_inputs, sample_targets = next(iter(train_loader))
     sample_dataloader = [(sample_inputs, sample_targets)]
     model = VGG(10).to(DEVICE)
